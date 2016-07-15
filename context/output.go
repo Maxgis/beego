@@ -24,6 +24,7 @@ import (
 	"mime"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -207,6 +208,10 @@ func (output *BeegoOutput) JSONP(data interface{}, hasIndent bool) error {
 	callback := output.Context.Input.Query("callback")
 	if callback == "" {
 		return errors.New(`"callback" parameter required`)
+	}
+	reg := regexp.MustCompile(`^[a-zA-z_$\.]*$`)
+	if !reg.MatchString(callback) {
+		return errors.New(`"callback" parameter invalid`)
 	}
 	callback = template.JSEscapeString(callback)
 	callbackContent := bytes.NewBufferString(" if(window." + callback + ")" + callback)
